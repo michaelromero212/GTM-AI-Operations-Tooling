@@ -9,38 +9,35 @@ A centralized operations platform designed to manage the full lifecycle of AI au
 GTM teams often struggle with manual, repetitive tasks that drain SDR/AE productivity. While AI offers a solution, scaling AI "shadow IT" leads to fragmentation and security risks. 
 
 The **GTM AI Operations Hub** provides a professional framework to:
-1. **Intake**: Standardize how automation requests are collected and triaged.
-2. **Govern**: Apply automated QA checks (PII, bias, hallucination) to every AI workflow.
-3. **Measure**: Quantify ROI through before/after time savings and adoption metrics.
+1. **Intake**: Standardize how automation requests are collected and triaged using AI.
+2. **Govern**: Apply automated QA gates (PII, bias, hallucination) to move quickly without breaking things.
+3. **Measure**: Quantify ROI through before/after time savings to prove value to leadership.
 
 ---
 
 ## ✨ Key Features
 
-### 📊 Operations Overview & Data in Motion
-A real-time snapshot of the automation pipeline. Featuring a **Live Event Stream** that captures every AI decision, security check, and workflow update as "Data in Motion" — echoing Confluent's core philosophy.
+### 📊 "Data in Motion" Overview
+A real-time snapshot of the automation pipeline. Featuring a **Live Event Stream** that captures every AI decision, security check, and workflow update as it happens—echoing Confluent's core philosophy of treating data as a continuous stream.
 
-### 📥 AI-Powered Triage Queue
-No more manual forms. This hub acts as the control center for requests ingested from **📧 Email, 💬 Slack, and ☁️ Salesforce**. The system uses LLMs to:
-- **Classify**: Map requests to Confluent GTM stages (Pipeline Gen, Deal Exec, Onboarding & Adoption, Expansion & Renewal).
-- **Triage**: Assign complexity scores and priority based on business impact and labor costs.
-- **Blueprint**: Generate structured requirements briefs and workflow architecture.
+### 📥 Automated AI Triage Queue
+The control center for requests ingested from **📧 Email, 💬 Slack, and ☁️ Salesforce**. 
+- **AI Classification**: Automatically maps requests to Confluent GTM stages (Pipeline Gen, Deal Exec, Onboarding & Adoption, Expansion & Renewal).
+- **Triage Model**: AI assigns complexity scores and priority based on business impact and labor influence.
 
 ![Intake & Triage](screenshots/intake.jpg)
 
-### 🛡️ Governance & Quality Assurance
-Shift-left on AI safety. Every workflow undergoes automated quality gates:
-- **PII & Data Leakage**: Detection of sensitive fields in AI outputs.
-- **Hallucination Checks**: Validation against source CRM data.
-- **Audit Trail**: A full decision log of every AI-driven action for compliance.
+### 🛡️ Operational Rigor & Governance
+Enterprise-grade safety for AI workflows. Every task passes through automated quality gates:
+- **QA Badging**: Real-time results for PII Detection, Bias Monitoring, and Hallucination Checks.
+- **Traceable Audit Log**: A full immutable decision trail for every AI-driven action.
 
 ![Governance and QA](screenshots/governance.jpg)
 
 ### 📈 Impact Tracker
 Move from "AI hype" to "AI ROI". 
-- **Time Savings**: Directly compare manual vs. AI-assisted hours.
-- **Financial Impact**: Estimated ROI based on loaded labor costs.
-- **Adoption**: Monitor which tools are actually sticking with the field teams.
+- **Direct ROI Visualization**: Compare manual vs. AI-assisted labor costs.
+- **Workflow Adoption**: Track which AI tools are driving the most efficiency for the field.
 
 ![Impact Tracker](screenshots/impact.jpg)
 
