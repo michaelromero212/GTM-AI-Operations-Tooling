@@ -12,24 +12,24 @@
 <!-- Summary Stats -->
 <div class="stats-grid">
     <div class="stat-card">
-        <span class="stat-label">Audited Events</span>
-        <span class="stat-value">{{ total_events }}</span>
-        <span class="stat-change positive">Full Traceability</span>
+        <div class="stat-label">Audited Events</div>
+        <div class="stat-value">{{ total_events }}</div>
+        <div class="stat-change positive">Full Traceability</div>
     </div>
     <div class="stat-card">
-        <span class="stat-label">QA Pass Rate</span>
-        <span class="stat-value">{{ qa_pass_rate }}%</span>
-        <span class="stat-change positive">Across All Checks</span>
+        <div class="stat-label">QA Pass Rate</div>
+        <div class="stat-value" style="color: var(--accent-green);">{{ qa_pass_rate }}%</div>
+        <div class="stat-change positive">Across All Checks</div>
     </div>
     <div class="stat-card">
-        <span class="stat-label">Avg Prompt Quality</span>
-        <span class="stat-value">{{ avg_quality }}/10</span>
-        <span class="stat-change positive">Versioned & Tested</span>
+        <div class="stat-label">Avg Prompt Quality</div>
+        <div class="stat-value gradient">{{ avg_quality }}/10</div>
+        <div class="stat-change positive">Versioned & Tested</div>
     </div>
     <div class="stat-card">
-        <span class="stat-label">Guardrailed Workflows</span>
-        <span class="stat-value">{{ active_workflows }}</span>
-        <span class="stat-change positive">Active QA Coverage</span>
+        <div class="stat-label">Guardrailed Workflows</div>
+        <div class="stat-value" style="color: var(--accent-cyan);">{{ active_workflows }}</div>
+        <div class="stat-change positive">Active QA Coverage</div>
     </div>
 </div>
 
