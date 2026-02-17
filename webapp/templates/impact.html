@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Impact Tracker — GTM AI Operations Hub{% endblock %}
+{% block topbar_title %}Impact Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📈 Impact Tracker</h2>
+    <p>Post-deployment metrics for shipped workflows — before/after comparison, adoption, and ROI.</p>
+</div>
+
+<!-- Summary Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Hours Saved / Week</div>
+        <div class="stat-value gradient">{{ total_time_saved }}</div>
+        <div class="stat-change positive">From Deployed Workflows</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Monthly ROI</div>
+        <div class="stat-value" style="color: var(--accent-green);">${{ "{:,.0f}".format(total_roi) }}</div>
+        <div class="stat-change positive">Estimated Revenue Impact</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Avg. Adoption Rate</div>
+        <div class="stat-value gradient">{{ avg_adoption }}%</div>
+        <div class="stat-change">Across Deployed Workflows</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Workflows Deployed</div>
+        <div class="stat-value" style="color: var(--accent-cyan);">{{ deployed_count }}</div>
+        <div class="stat-change">In Production Or Measuring</div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="impact-grid">
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Time Savings Breakdown</span>
+            <span class="card-icon">⏱</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="time-savings-chart"
+                data-labels='{{ metrics | selectattr("weeks_deployed", "gt", 0) | map(attribute="title") | list | tojson }}'
+                data-before='{{ metrics | selectattr("weeks_deployed", "gt", 0) | map(attribute="manual_time_before") | list | tojson }}'
+                data-after='{{ metrics | selectattr("weeks_deployed", "gt", 0) | map(attribute="ai_time_after") | list | tojson }}'></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">ROI Distribution</span>
+            <span class="card-icon">💰</span>
+        </div>
+        <div class="chart-container">
+            <canvas id="roi-chart"
+                data-labels='{{ metrics | selectattr("roi_estimate", "gt", 0) | map(attribute="title") | list | tojson }}'
+                data-roi='{{ metrics | selectattr("roi_estimate", "gt", 0) | map(attribute="roi_estimate") | list | tojson }}'></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Metrics Table -->
+<div class="card" style="margin-top: 24px;">
+    <div class="card-header">
+        <span class="card-title">All Workflows</span>
+    </div>
+    {% if metrics %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Workflow</th>
+                    <th>Status</th>
+                    <th>Manual (hrs/wk)</th>
+                    <th>AI (hrs/wk)</th>
+                    <th>Saved</th>
+                    <th>Adoption</th>
+                    <th>Monthly ROI</th>
+                    <th>Weeks Live</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in metrics %}
+                <tr>
+                    <td><strong>{{ m.title }}</strong></td>
+                    <td>
+                        {% if m.status == 'Deployed' %}<span class="badge badge-green">{{ m.status }}</span>
+                        {% elif m.status == 'Measuring' %}<span class="badge badge-cyan">{{ m.status }}</span>
+                        {% elif m.status == 'QA' %}<span class="badge badge-yellow">{{ m.status }}</span>
+                        {% else %}<span class="badge badge-blue">{{ m.status }}</span>{% endif %}
+                    </td>
+                    <td>{{ m.manual_time_before }}</td>
+                    <td>{{ m.ai_time_after }}</td>
+                    <td style="color: var(--accent-green); font-weight: 600;">
+                        {% if m.manual_time_before > 0 %}
+                        {{ ((m.manual_time_before - m.ai_time_after) / m.manual_time_before * 100) | round(0) }}%
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        {% if m.adoption_rate > 0 %}
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="background: var(--bg-secondary); border-radius: 4px; height: 6px; width: 80px;">
+                                <div
+                                    style="background: var(--accent-green); border-radius: 4px; height: 100%; width: {{ m.adoption_rate }}%;">
+                                </div>
+                            </div>
+                            <span>{{ m.adoption_rate }}%</span>
+                        </div>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>{% if m.roi_estimate > 0 %}<span style="color: var(--accent-green);">${{
+                            "{:,.0f}".format(m.roi_estimate) }}</span>{% else %}—{% endif %}</td>
+                    <td>{{ m.weeks_deployed if m.weeks_deployed > 0 else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><span class="icon">📈</span>
+        <h3>No metrics yet</h3>
+        <p>Deploy workflows to start tracking impact.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

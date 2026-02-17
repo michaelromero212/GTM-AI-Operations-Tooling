@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="GTM AI Operations Hub — Manage the full lifecycle of AI automation requests from GTM teams">
+    <title>{% block title %}GTM AI Operations Hub{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <h1>GTM AI Ops Hub</h1>
+                <span>Operations Platform</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/" class="{% if request.url.path == '/' %}active{% endif %}">
+                    <span class="nav-icon">📊</span> Overview
+                </a>
+                <a href="/intake" class="{% if request.url.path == '/intake' %}active{% endif %}">
+                    <span class="nav-icon">📥</span> Intake
+                </a>
+                <a href="/governance" class="{% if request.url.path == '/governance' %}active{% endif %}">
+                    <span class="nav-icon">🛡️</span> Governance & QA
+                </a>
+                <a href="/impact" class="{% if request.url.path == '/impact' %}active{% endif %}">
+                    <span class="nav-icon">📈</span> Impact Tracker
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">☰</button>
+                    <span class="topbar-title">{% block topbar_title %}GTM AI Operations Hub{% endblock %}</span>
+                </div>
+                <div class="ai-status" id="ai-status-badge" data-status="checking">
+                    <div class="ai-status-dot"></div>
+                    <span class="ai-status-label" id="ai-status-label">Checking…</span>
+                    <span class="ai-status-latency" id="ai-status-latency"></span>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page">
+                {% if error %}
+                <div class="error-banner">⚠️ {{ error }}</div>
+                {% endif %}
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+    <script>
+        // Sidebar toggle for mobile
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            });
+        }
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

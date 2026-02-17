@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Backlog — GTM AI Operations Hub{% endblock %}
+{% block topbar_title %}Backlog & Prioritization{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📋 Backlog Board</h2>
+    <p>Drag cards between columns to update status. Prioritized by impact × feasibility ÷ effort.</p>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+    <a href="/backlog" class="filter-btn {% if not active_team and not active_status %}active{% endif %}">All ({{
+        total_items }})</a>
+    {% for team in teams %}
+    <a href="/backlog?team={{ team }}" class="filter-btn {% if active_team == team %}active{% endif %}">{{ team }}</a>
+    {% endfor %}
+</div>
+
+<!-- Kanban Board -->
+<div class="kanban-board">
+    {% for status_name in ['Intake', 'Scoping', 'In Build', 'QA', 'Deployed', 'Measuring'] %}
+    <div class="kanban-column" data-status="{{ status_name }}">
+        <div class="kanban-column-header">
+            <span class="kanban-column-title">{{ status_name }}</span>
+            <span class="kanban-column-count">{{ columns[status_name] | length }}</span>
+        </div>
+        <div class="kanban-cards">
+            {% for item in columns[status_name] %}
+            <div class="kanban-card" draggable="true" data-item-id="{{ item.id }}">
+                <div class="kanban-card-title">{{ item.title }}</div>
+                <div class="kanban-card-meta">
+                    {% if item.complexity == 'Quick Win' %}<span class="badge badge-green">{{ item.complexity }}</span>
+                    {% elif item.complexity == 'Medium' %}<span class="badge badge-yellow">{{ item.complexity }}</span>
+                    {% else %}<span class="badge badge-red">{{ item.complexity }}</span>{% endif %}
+
+                    {% if item.approach == 'AI Agent' %}<span class="badge badge-blue">{{ item.approach }}</span>
+                    {% elif item.approach == 'Workflow Automation' %}<span class="badge badge-purple">{{ item.approach
+                        }}</span>
+                    {% elif item.approach == 'Data Fix' %}<span class="badge badge-orange">{{ item.approach }}</span>
+                    {% else %}<span class="badge badge-yellow">{{ item.approach }}</span>{% endif %}
+                </div>
+                <div class="kanban-card-meta">
+                    <span style="font-size: 11px; color: var(--text-muted);">{{ item.requester_team }}</span>
+                </div>
+                <div class="kanban-card-footer">
+                    <span>{{ item.requester_name }}</span>
+                    <div class="priority-bar">
+                        <div class="priority-dots">
+                            {% for i in range(10) %}
+                            <div
+                                class="priority-dot {% if i < item.priority_score %}filled {% if item.priority_score >= 8 %}high{% elif item.priority_score >= 5 %}medium{% endif %}{% endif %}">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% if item.assigned_to %}
+                <div style="margin-top: 8px; font-size: 11px; color: var(--text-muted);">
+                    👤 {{ item.assigned_to }}
+                </div>
+                {% endif %}
+                <div style="margin-top: 8px;">
+                    <a href="/builder/{{ item.request_id }}" class="card-link">Open Builder →</a>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if columns[status_name] | length == 0 %}
+            <div class="empty-state" style="padding: 24px 12px;">
+                <span style="font-size: 24px; opacity: 0.3;">📋</span>
+                <p style="font-size: 11px; margin-top: 8px;">No items</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

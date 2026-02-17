@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Governance & QA — GTM AI Operations Hub{% endblock %}
+{% block topbar_title %}Governance & QA{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>🛡️ Governance & QA</h2>
+    <p>Audit trail, quality gates, and compliance tracking for AI workflows — ensuring safe, repeatable delivery.</p>
+</div>
+
+<!-- Summary Stats -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Audited Events</span>
+        <span class="stat-value">{{ total_events }}</span>
+        <span class="stat-change positive">Full Traceability</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">QA Pass Rate</span>
+        <span class="stat-value">{{ qa_pass_rate }}%</span>
+        <span class="stat-change positive">Across All Checks</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Avg Prompt Quality</span>
+        <span class="stat-value">{{ avg_quality }}/10</span>
+        <span class="stat-change positive">Versioned & Tested</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Guardrailed Workflows</span>
+        <span class="stat-value">{{ active_workflows }}</span>
+        <span class="stat-change positive">Active QA Coverage</span>
+    </div>
+</div>
+
+<!-- QA Test Results -->
+<div class="card" style="margin-top: 32px;">
+    <div class="card-header">
+        <h3>🧪 QA Test Results</h3>
+        <span class="card-subtitle">Automated quality gates for AI workflows</span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Workflow</th>
+                    <th>Check</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                    <th>Run Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for qa in qa_results %}
+                <tr>
+                    <td><strong>{{ qa.workflow_title }}</strong></td>
+                    <td>{{ qa.check_name }}</td>
+                    <td>
+                        {% if qa.status == 'pass' %}
+                        <span class="qa-badge qa-pass">✅ Pass</span>
+                        {% elif qa.status == 'fail' %}
+                        <span class="qa-badge qa-fail">❌ Fail</span>
+                        {% else %}
+                        <span class="qa-badge qa-warning">⚠️ Warning</span>
+                        {% endif %}
+                    </td>
+                    <td class="qa-details">{{ qa.details }}</td>
+                    <td class="qa-date">{{ qa.run_at.strftime('%b %d, %H:%M') if qa.run_at else '' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Audit Log Timeline -->
+<div class="card" style="margin-top: 32px;">
+    <div class="card-header">
+        <h3>📜 Audit Log</h3>
+        <span class="card-subtitle">Complete AI decision trail — every action tracked</span>
+    </div>
+    <div class="audit-timeline">
+        {% for entry in audit_entries %}
+        <div class="audit-entry">
+            <div class="audit-entry-header">
+                <span class="audit-event-badge audit-event-{{ entry.event_type }}">
+                    {% if entry.event_type == 'triage' %}🤖 Triage
+                    {% elif entry.event_type == 'intake_received' %}📥 Intake
+                    {% elif entry.event_type == 'blueprint_generated' %}🏗️ Blueprint
+                    {% elif entry.event_type == 'prompt_tested' %}🧪 Prompt Test
+                    {% elif entry.event_type == 'qa_completed' %}✅ QA Complete
+                    {% elif entry.event_type == 'status_change' %}🔄 Status Change
+                    {% elif entry.event_type == 'deployment' %}🚀 Deployment
+                    {% elif entry.event_type == 'compliance_review' %}⚖️ Compliance
+                    {% else %}📋 {{ entry.event_type }}
+                    {% endif %}
+                </span>
+                <span class="audit-actor">{{ entry.actor }}</span>
+                <span class="audit-request-id">{{ entry.request_id }}</span>
+                <span class="audit-timestamp">{{ entry.timestamp.strftime('%b %d, %Y · %H:%M') if entry.timestamp else
+                    '' }}</span>
+            </div>
+            <p class="audit-description">{{ entry.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

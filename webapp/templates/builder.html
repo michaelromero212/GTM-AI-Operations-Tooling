@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Builder — GTM AI Operations Hub{% endblock %}
+{% block topbar_title %}Workflow Builder{% endblock %}
+
+{% block content %}
+{% if item %}
+<div class="page-header">
+    <h2>🧠 Workflow Builder</h2>
+    <p>Request <strong>{{ item.id }}</strong> — Generate AI-powered workflow blueprints and iterate on prompts.</p>
+</div>
+
+<!-- Request Summary -->
+<div class="card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <span class="card-title">Request Details</span>
+        <span class="badge badge-blue">{{ item.status or 'Intake' }}</span>
+    </div>
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; font-size: 13px;">
+        <div>
+            <span style="color: var(--text-muted);">Requester:</span>
+            <strong>{{ item.requester_name }}</strong> ({{ item.requester_team }})
+        </div>
+        <div>
+            <span style="color: var(--text-muted);">GTM Stage:</span>
+            <span class="badge badge-purple">{{ item.gtm_stage or 'Unknown' }}</span>
+        </div>
+        <div>
+            <span style="color: var(--text-muted);">Complexity:</span>
+            <span class="badge badge-yellow">{{ item.complexity or 'Unknown' }}</span>
+        </div>
+        <div>
+            <span style="color: var(--text-muted);">Approach:</span>
+            <span class="badge badge-blue">{{ item.approach or 'Unknown' }}</span>
+        </div>
+    </div>
+    <div style="margin-top: 16px; font-size: 13px; color: var(--text-secondary); line-height: 1.7;">
+        <strong>Pain Point:</strong> {{ item.pain_point }}
+    </div>
+</div>
+
+<!-- Requirements Brief -->
+{% if requirements %}
+<div class="card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <span class="card-title">📝 Requirements Brief</span>
+        <span class="badge badge-green">Auto-Generated</span>
+    </div>
+    <div class="result-body" style="font-size: 13px;">
+        {% if requirements.title %}<p><strong>{{ requirements.title }}</strong></p>{% endif %}
+        {% if requirements.problem_statement %}<p style="margin-top: 8px;">{{ requirements.problem_statement }}</p>{%
+        endif %}
+
+        {% if requirements.current_process %}
+        <p style="margin-top: 12px; color: var(--text-muted);">Current Process:</p>
+        <ul style="padding-left: 20px;">
+            {% for step in requirements.current_process %}<li>{{ step }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if requirements.proposed_solution %}
+        <p style="margin-top: 12px; color: var(--text-muted);">Proposed Solution:</p>
+        <ul style="padding-left: 20px;">
+            {% for step in requirements.proposed_solution %}<li>{{ step }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if requirements.data_sources %}
+        <p style="margin-top: 12px;">
+            <span style="color: var(--text-muted);">Data Sources:</span>
+            {% for ds in requirements.data_sources %}<span class="badge badge-blue" style="margin-left: 6px;">{{ ds
+                }}</span>{% endfor %}
+        </p>
+        {% endif %}
+
+        {% if requirements.estimated_effort %}
+        <p style="margin-top: 8px;">
+            <span style="color: var(--text-muted);">Effort:</span>
+            <span class="badge badge-purple">{{ requirements.estimated_effort }}</span>
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Blueprint Generator -->
+<div class="card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <span class="card-title">🚀 Workflow Blueprint</span>
+        <button class="btn btn-primary" id="generate-blueprint-btn" onclick="generateBlueprint('{{ item.id }}')">
+            🧠 Generate Blueprint
+        </button>
+    </div>
+    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+        Click "Generate Blueprint" to have the AI create a current→future state workflow design with integrations and
+        governance.
+    </p>
+    <div id="blueprint-output">
+        <div class="empty-state" style="padding: 32px;">
+            <span class="icon">🏗️</span>
+            <h3>No blueprint generated yet</h3>
+            <p>Click the button above to generate an AI-powered workflow blueprint.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Prompt Lab -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">🔬 Prompt Lab</span>
+        <span class="badge badge-purple">{{ prompt_versions | length }} versions</span>
+    </div>
+
+    <div class="prompt-lab">
+        <div class="editor-pane">
+            <label class="form-label">Prompt Input</label>
+            <textarea id="prompt-input" class="form-textarea" rows="8"
+                placeholder="Write a prompt to test. The AI will respond and save this as a new version for tracking."></textarea>
+            <button class="btn btn-primary" id="prompt-submit-btn" onclick="submitPrompt('{{ item.id }}')"
+                style="margin-top: 12px;">
+                ▶ Run Prompt
+            </button>
+        </div>
+        <div class="output-pane">
+            <label class="form-label">Response</label>
+            <div id="prompt-output" style="min-height: 200px;">
+                <div class="empty-state" style="padding: 24px;">
+                    <span style="font-size: 32px;">💬</span>
+                    <p style="margin-top: 8px;">Run a prompt to see the AI response here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Version History -->
+    {% if prompt_versions %}
+    <div style="margin-top: 24px;">
+        <label class="form-label">Version History</label>
+        <div class="version-list">
+            {% for pv in prompt_versions %}
+            <div class="version-item">
+                <div class="version-item-header">
+                    <span class="version-number">v{{ pv.version }}</span>
+                    {% if pv.quality_score %}
+                    <span
+                        class="quality-score {% if pv.quality_score >= 7 %}high{% elif pv.quality_score >= 4 %}medium{% else %}low{% endif %}">
+                        {{ pv.quality_score }}/10
+                    </span>
+                    {% endif %}
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">
+                    <strong>Prompt:</strong> {{ pv.prompt_text[:100] }}{% if pv.prompt_text | length > 100 %}…{% endif
+                    %}
+                </div>
+                {% if pv.response_text %}
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                    <strong>Response:</strong> {{ pv.response_text[:120] }}{% if pv.response_text | length > 120 %}…{%
+                    endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% else %}
+<div class="empty-state" style="padding: 64px;">
+    <span class="icon">🔍</span>
+    <h3>Request not found</h3>
+    <p>The request you're looking for doesn't exist.</p>
+    <a href="/backlog" class="btn btn-primary" style="margin-top: 16px;">← Back to Backlog</a>
+</div>
+{% endif %}
+{% endblock %}

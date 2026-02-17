@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Intake — GTM AI Operations Hub{% endblock %}
+{% block topbar_title %}Intake{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📥 Submit Automation Request</h2>
+    <p>Describe your pain point and the AI will triage, classify, and generate a structured requirements brief.</p>
+</div>
+
+<div class="grid-2">
+    <!-- Intake Form -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">New Request</span>
+        </div>
+        <form method="POST" action="/intake" id="intake-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" name="requester_name" class="form-input" placeholder="e.g. Sarah Chen" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Team</label>
+                    <select name="requester_team" class="form-select" required>
+                        <option value="">Select team…</option>
+                        <option value="Sales (SDR)">Sales (SDR)</option>
+                        <option value="Sales (AE)">Sales (AE)</option>
+                        <option value="Sales (Manager)">Sales (Manager)</option>
+                        <option value="Customer Success">Customer Success</option>
+                        <option value="RevOps">RevOps</option>
+                        <option value="Marketing Ops">Marketing Ops</option>
+                        <option value="BizTech">BizTech</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Pain Point Description</label>
+                <textarea name="pain_point" class="form-textarea" rows="4"
+                    placeholder="Describe the manual work your team is doing. Be specific about what's painful, how much time it takes, and what impact it has."
+                    required></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Current Workflow Stage</label>
+                    <select name="workflow_stage" class="form-select" required>
+                        <option value="">Select stage…</option>
+                        <option value="Prospecting">Prospecting</option>
+                        <option value="Lead Qualification">Lead Qualification</option>
+                        <option value="Deal Execution">Deal Execution</option>
+                        <option value="Follow-up">Follow-up</option>
+                        <option value="Onboarding">Onboarding</option>
+                        <option value="Renewal Tracking">Renewal Tracking</option>
+                        <option value="Data Management">Data Management</option>
+                        <option value="Reporting">Reporting</option>
+                        <option value="Campaign Attribution">Campaign Attribution</option>
+                        <option value="Pipeline Review">Pipeline Review</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Manual Time (hours/week)</label>
+                    <input type="number" name="manual_time_hours" class="form-input" step="0.5" min="0.5" max="80"
+                        placeholder="e.g. 10" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Urgency</label>
+                <select name="urgency" class="form-select">
+                    <option value="Low">Low — Nice to have</option>
+                    <option value="Medium" selected>Medium — Impacting productivity</option>
+                    <option value="High">High — Significant business impact</option>
+                    <option value="Critical">Critical — Blocking revenue</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 8px;">
+                🧠 Submit & Auto-Triage with AI
+            </button>
+        </form>
+    </div>
+
+    <!-- Info Panel -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">How It Works</span>
+                <span class="card-icon">✨</span>
+            </div>
+            <div style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
+                <div><strong>1.</strong> Submit your automation request with as much detail as possible</div>
+                <div><strong>2.</strong> AI auto-classifies by GTM stage, complexity, and approach</div>
+                <div><strong>3.</strong> A structured requirements brief is generated</div>
+                <div><strong>4.</strong> Request enters the backlog for prioritization</div>
+                <div><strong>5.</strong> Track progress from Intake → Deployed</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">AI Classification</span>
+                <span class="card-icon">🎯</span>
+            </div>
+            <div style="font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
+                <div>
+                    <div style="color: var(--text-muted); margin-bottom: 4px;">GTM Stage</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <span class="badge badge-blue">Pipeline Gen</span>
+                        <span class="badge badge-purple">Deal Exec</span>
+                        <span class="badge badge-green">Onboarding</span>
+                        <span class="badge badge-cyan">Renewal</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); margin-bottom: 4px;">Complexity</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <span class="badge badge-green">Quick Win</span>
+                        <span class="badge badge-yellow">Medium</span>
+                        <span class="badge badge-red">Strategic</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); margin-bottom: 4px;">Approach</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <span class="badge badge-blue">AI Agent</span>
+                        <span class="badge badge-purple">Automation</span>
+                        <span class="badge badge-orange">Data Fix</span>
+                        <span class="badge badge-yellow">Process</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Panel -->
+{% if result %}
+<div class="result-panel success fade-in" style="margin-top: 24px;">
+    <div class="result-header">
+        <span>✅</span>
+        <h3>Request Submitted — {{ result.request_id }}</h3>
+        <span class="badge {% if result.source == 'llm' %}badge-green{% else %}badge-yellow{% endif %}">
+            {{ 'AI Triaged' if result.source == 'llm' else 'Mock Triage' }}
+        </span>
+    </div>
+
+    <div class="result-meta">
+        <span>⏱ Triage latency: {{ result.latency_ms }}ms</span>
+    </div>
+
+    <!-- Triage Results -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px;">
+        <div class="stat-card" style="padding: 14px;">
+            <div class="stat-label">GTM Stage</div>
+            <div style="font-weight: 600; color: var(--accent-blue);">{{ result.triage.gtm_stage }}</div>
+        </div>
+        <div class="stat-card" style="padding: 14px;">
+            <div class="stat-label">Complexity</div>
+            <div style="font-weight: 600; color: var(--accent-purple);">{{ result.triage.complexity }}</div>
+        </div>
+        <div class="stat-card" style="padding: 14px;">
+            <div class="stat-label">Approach</div>
+            <div style="font-weight: 600; color: var(--accent-green);">{{ result.triage.approach }}</div>
+        </div>
+        <div class="stat-card" style="padding: 14px;">
+            <div class="stat-label">Priority</div>
+            <div style="font-weight: 600; color: var(--accent-orange);">{{ result.triage.priority_score }} / 10</div>
+        </div>
+    </div>
+
+    <!-- Requirements Brief -->
+    {% if result.requirements %}
+    <div class="card" style="margin-top: 16px; background: var(--bg-secondary);">
+        <div class="card-header">
+            <span class="card-title">📝 Generated Requirements Brief</span>
+        </div>
+        <div class="result-body">
+            {% if result.requirements.title %}<p><strong>Title:</strong> {{ result.requirements.title }}</p>{% endif %}
+            {% if result.requirements.problem_statement %}<p style="margin-top: 8px;"><strong>Problem:</strong> {{
+                result.requirements.problem_statement }}</p>{% endif %}
+            {% if result.requirements.estimated_effort %}<p style="margin-top: 8px;"><strong>Effort:</strong> {{
+                result.requirements.estimated_effort }}</p>{% endif %}
+            {% if result.requirements.success_metrics %}
+            <p style="margin-top: 8px;"><strong>Success Metrics:</strong></p>
+            <ul style="padding-left: 20px; margin-top: 4px;">
+                {% for m in result.requirements.success_metrics %}<li>{{ m }}</li>{% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 16px; display: flex; gap: 12px;">
+        <a href="/backlog" class="btn btn-primary">View in Backlog →</a>
+        <a href="/builder/{{ result.request_id }}" class="btn btn-secondary">Open Builder →</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
