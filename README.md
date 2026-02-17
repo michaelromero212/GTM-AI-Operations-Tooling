@@ -27,6 +27,11 @@ The control center for requests ingested from **📧 Email, 💬 Slack, and ☁�
 
 ![Intake & Triage](screenshots/intake.jpg)
 
+### 🧠 Workflow Builder & Blueprinting
+Once a request is triaged, the hub generates a comprehensive **Workflow Blueprint**. This translates the business pain point into a technical architecture, mapping out integration touchpoints, automated quality gates, and projected time savings.
+
+![Workflow Builder](screenshots/builder.jpg)
+
 ### 🛡️ Operational Rigor & Governance
 Enterprise-grade safety for AI workflows. Every task passes through automated quality gates:
 - **QA Badging**: Real-time results for PII Detection, Bias Monitoring, and Hallucination Checks.
