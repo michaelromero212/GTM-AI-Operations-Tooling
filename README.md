@@ -2,7 +2,7 @@
 
 A centralized operations platform designed to manage the full lifecycle of AI automation requests from Go-To-Market (GTM) teams. This hub translates vague field requests into structured requirements, applies governance guardrails, and tracks realized business impact.
 
-![Operations Overview](docs/screenshots/overview.png)
+![Operations Overview](screenshots/overview.jpg)
 
 ## 🚀 The Mission
 
@@ -26,13 +26,15 @@ Submit manual pain points in plain natural language. The system uses LLMs to:
 - **Triage**: Assign complexity scores and priority based on business impact.
 - **Blueprint**: Generate structured requirements briefs and workflow architecture.
 
+![Intake & Triage](screenshots/intake.jpg)
+
 ### 🛡️ Governance & Quality Assurance
 Shift-left on AI safety. Every workflow undergoes automated quality gates:
 - **PII & Data Leakage**: Detection of sensitive fields in AI outputs.
 - **Hallucination Checks**: Validation against source CRM data.
 - **Audit Trail**: A full decision log of every AI-driven action for compliance.
 
-![Governance and QA](docs/screenshots/governance.png)
+![Governance and QA](screenshots/governance.jpg)
 
 ### 📈 Impact Tracker
 Move from "AI hype" to "AI ROI". 
@@ -40,7 +42,8 @@ Move from "AI hype" to "AI ROI".
 - **Financial Impact**: Estimated ROI based on loaded labor costs.
 - **Adoption**: Monitor which tools are actually sticking with the field teams.
 
-![Impact Tracker](docs/screenshots/impact.png)
+![Impact Tracker](screenshots/impact.jpg)
+
 
 ---
 
