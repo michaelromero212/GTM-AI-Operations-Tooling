@@ -5,24 +5,84 @@
 
 {% block content %}
 <div class="page-header">
-    <h2>📥 Submit Automation Request</h2>
-    <p>Describe your pain point and the AI will triage, classify, and generate a structured requirements brief.</p>
+    <h2>📥 AI Triage Queue</h2>
+    <p>Automated ingestion from 📧 Email, 💬 Slack, and ☁️ Salesforce. AI-powered classification and requirements
+        generation in real-time.</p>
+</div>
+
+<!-- Triage Queue Table -->
+<div class="card" style="margin-bottom: 32px;">
+    <div class="card-header">
+        <span class="card-title">Recent Ingestions (Live)</span>
+        <div style="display: flex; gap: 8px;">
+            <span class="badge badge-blue">📧 4 Pending</span>
+            <span class="badge badge-purple">💬 2 New</span>
+        </div>
+    </div>
+    {% if queue %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Source</th>
+                    <th>ID</th>
+                    <th>Requester</th>
+                    <th>Team</th>
+                    <th>AI Triage Summary</th>
+                    <th>Urgency</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in queue %}
+                <tr>
+                    <td>
+                        {% if 'Sales' in row.requester_team %}💬 Slack
+                        {% elif 'Customer' in row.requester_team %}📧 Email
+                        {% else %}☁️ SFDC{% endif %}
+                    </td>
+                    <td><a href="/builder/{{ row.id }}" class="card-link">{{ row.id }}</a></td>
+                    <td>{{ row.requester_name }}</td>
+                    <td>{{ row.requester_team }}</td>
+                    <td>{{ row.triage_summary or 'Awaiting AI Analysis...' }}</td>
+                    <td>
+                        {% if row.urgency == 'CRITICAL' %}<span class="badge badge-red">{{ row.urgency }}</span>
+                        {% elif row.urgency == 'HIGH' %}<span class="badge badge-orange">{{ row.urgency }}</span>
+                        {% elif row.urgency == 'MEDIUM' %}<span class="badge badge-yellow">{{ row.urgency }}</span>
+                        {% else %}<span class="badge badge-blue">{{ row.urgency }}</span>{% endif %}
+                    </td>
+                    <td>
+                        <a href="/builder/{{ row.id }}" class="btn btn-sm btn-primary">Open Builder</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><span class="icon">📭</span>
+        <h3>No active ingestions</h3>
+        <p>The queue is currently empty. Automated syncs run every 5 minutes.</p>
+    </div>
+    {% endif %}
 </div>
 
 <div class="grid-2">
-    <!-- Intake Form -->
+    <!-- Manual Entry Form (Pivot to secondary) -->
     <div class="card">
         <div class="card-header">
-            <span class="card-title">New Request</span>
+            <span class="card-title">Manual Request Entry</span>
         </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Use this for direct field requests or
+            offline submissions.</p>
         <form method="POST" action="/intake" id="intake-form">
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Your Name</label>
+                    <label class="form-label">Requester</label>
                     <input type="text" name="requester_name" class="form-input" placeholder="e.g. Sarah Chen" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Team</label>
+                    <label class="form-label">GTM Team</label>
                     <select name="requester_team" class="form-select" required>
                         <option value="">Select team…</option>
                         <option value="Sales (SDR)">Sales (SDR)</option>
@@ -31,110 +91,79 @@
                         <option value="Customer Success">Customer Success</option>
                         <option value="RevOps">RevOps</option>
                         <option value="Marketing Ops">Marketing Ops</option>
-                        <option value="BizTech">BizTech</option>
                     </select>
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Pain Point Description</label>
-                <textarea name="pain_point" class="form-textarea" rows="4"
-                    placeholder="Describe the manual work your team is doing. Be specific about what's painful, how much time it takes, and what impact it has."
+                <label class="form-label">Pain Point Detail</label>
+                <textarea name="pain_point" class="form-textarea" rows="3" placeholder="Describe the manual work..."
                     required></textarea>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Current Workflow Stage</label>
+                    <label class="form-label">Confluent GTM Stage</label>
                     <select name="workflow_stage" class="form-select" required>
                         <option value="">Select stage…</option>
-                        <option value="Prospecting">Prospecting</option>
-                        <option value="Lead Qualification">Lead Qualification</option>
+                        <option value="Pipeline Generation">Pipeline Generation</option>
                         <option value="Deal Execution">Deal Execution</option>
-                        <option value="Follow-up">Follow-up</option>
-                        <option value="Onboarding">Onboarding</option>
-                        <option value="Renewal Tracking">Renewal Tracking</option>
-                        <option value="Data Management">Data Management</option>
-                        <option value="Reporting">Reporting</option>
-                        <option value="Campaign Attribution">Campaign Attribution</option>
-                        <option value="Pipeline Review">Pipeline Review</option>
+                        <option value="Onboarding & Adoption">Onboarding & Adoption</option>
+                        <option value="Expansion & Renewal">Expansion & Renewal</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Manual Time (hours/week)</label>
-                    <input type="number" name="manual_time_hours" class="form-input" step="0.5" min="0.5" max="80"
-                        placeholder="e.g. 10" required>
+                    <label class="form-label">Time Saved (hrs/wk)</label>
+                    <input type="number" name="manual_time_hours" class="form-input" step="0.5" min="0.5" required>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Urgency</label>
-                <select name="urgency" class="form-select">
-                    <option value="Low">Low — Nice to have</option>
-                    <option value="Medium" selected>Medium — Impacting productivity</option>
-                    <option value="High">High — Significant business impact</option>
-                    <option value="Critical">Critical — Blocking revenue</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 8px;">
-                🧠 Submit & Auto-Triage with AI
+            <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 8px;">
+                🧠 Process with AI Agent
             </button>
         </form>
     </div>
 
-    <!-- Info Panel -->
+    <!-- Triage Logic Guide -->
     <div style="display: flex; flex-direction: column; gap: 20px;">
         <div class="card">
             <div class="card-header">
-                <span class="card-title">How It Works</span>
-                <span class="card-icon">✨</span>
+                <span class="card-title">Operational Rigor: Triage Model</span>
+                <span class="card-icon">🏗️</span>
             </div>
-            <div style="font-size: 13px; color: var(--text-secondary); line-height: 2;">
-                <div><strong>1.</strong> Submit your automation request with as much detail as possible</div>
-                <div><strong>2.</strong> AI auto-classifies by GTM stage, complexity, and approach</div>
-                <div><strong>3.</strong> A structured requirements brief is generated</div>
-                <div><strong>4.</strong> Request enters the backlog for prioritization</div>
-                <div><strong>5.</strong> Track progress from Intake → Deployed</div>
+            <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                <p>Every ingestion is processed through a three-stage AI gate:</p>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li><strong>Extraction:</strong> Pain points mapped to CRM objects.</li>
+                    <li><strong>Impact Scoring:</strong> Priority assigned by labor cost + deal influence.</li>
+                    <li><strong>Blueprint Gen:</strong> Auto-generating workflow logic for Relex/LangGraph.</li>
+                </ul>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <span class="card-title">AI Classification</span>
-                <span class="card-icon">🎯</span>
+                <span class="card-title">Ingestion Health</span>
+                <span class="card-icon">🟢</span>
             </div>
-            <div style="font-size: 12px; display: flex; flex-direction: column; gap: 10px;">
-                <div>
-                    <div style="color: var(--text-muted); margin-bottom: 4px;">GTM Stage</div>
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <span class="badge badge-blue">Pipeline Gen</span>
-                        <span class="badge badge-purple">Deal Exec</span>
-                        <span class="badge badge-green">Onboarding</span>
-                        <span class="badge badge-cyan">Renewal</span>
-                    </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>📧 Outlook/GCal Sync</span>
+                    <span style="color: var(--accent-green); font-weight: 600;">ACTIVE</span>
                 </div>
-                <div>
-                    <div style="color: var(--text-muted); margin-bottom: 4px;">Complexity</div>
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <span class="badge badge-green">Quick Win</span>
-                        <span class="badge badge-yellow">Medium</span>
-                        <span class="badge badge-red">Strategic</span>
-                    </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>💬 Slack #gtm-ops-live</span>
+                    <span style="color: var(--accent-green); font-weight: 600;">CONNECTED</span>
                 </div>
-                <div>
-                    <div style="color: var(--text-muted); margin-bottom: 4px;">Approach</div>
-                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                        <span class="badge badge-blue">AI Agent</span>
-                        <span class="badge badge-purple">Automation</span>
-                        <span class="badge badge-orange">Data Fix</span>
-                        <span class="badge badge-yellow">Process</span>
-                    </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>☁️ Salesforce Metadata</span>
+                    <span style="color: var(--accent-green); font-weight: 600;">SYNCED</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Results Panel -->
 {% if result %}

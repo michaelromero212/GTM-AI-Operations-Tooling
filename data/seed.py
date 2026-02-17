@@ -117,31 +117,37 @@ def seed_data(con: duckdb.DuckDBPyConnection):
 
     # ── Intake Requests ──
     requests_data = [
-        ("REQ-001", "Sarah Chen", "Sales (SDR)", "Our SDRs spend 30 min per lead researching company info, recent news, and tech stack before outreach. This is killing our daily lead capacity.", "Prospecting", 15.0, "High", "Pipeline Generation", "Medium", "AI Agent", 8, "Automate lead research aggregation to reduce SDR prep time"),
-        ("REQ-002", "James Rodriguez", "Customer Success", "CSMs manually track renewal risk in spreadsheets. We have no early warning system — we find out accounts are churning when it's too late.", "Renewal Tracking", 10.0, "Critical", "Renewal & Expansion", "Strategic", "AI Agent", 9, "Build predictive churn early-warning system using engagement signals"),
-        ("REQ-003", "Priya Patel", "RevOps", "Deal data in Salesforce is inconsistent — missing fields, wrong stages, duplicate contacts. We spend hours weekly on manual cleanup.", "Data Management", 8.0, "Medium", "Deal Execution", "Quick Win", "Data Fix", 6, "Automated data hygiene scanning and correction for CRM records"),
-        ("REQ-004", "Marcus Thompson", "Sales (AE)", "After every customer meeting, I spend 20 min writing follow-up emails. Could AI draft these from my meeting notes?", "Follow-up", 5.0, "Medium", "Deal Execution", "Quick Win", "AI Agent", 7, "AI-generated follow-up emails from meeting notes and CRM context"),
-        ("REQ-005", "Lisa Wang", "Marketing Ops", "We can't tell which campaigns are actually driving pipeline vs. just generating MQLs that never convert. Attribution is manual and unreliable.", "Campaign Attribution", 12.0, "High", "Pipeline Generation", "Strategic", "Workflow Automation", 8, "Automated multi-touch attribution connecting marketing campaigns to closed revenue"),
-        ("REQ-006", "David Kim", "Customer Success", "Onboarding new customers takes 6 weeks because CSMs manually create and track implementation checklists. Every customer gets a slightly different experience.", "Onboarding", 20.0, "High", "Onboarding & Adoption", "Medium", "Workflow Automation", 7, "Standardized automated onboarding workflow with milestone tracking"),
-        ("REQ-007", "Rachel Foster", "Sales (Manager)", "I can't get a real-time view of deal health across my team. I rely on reps self-reporting in stand-ups, which is always outdated.", "Pipeline Review", 6.0, "Medium", "Deal Execution", "Medium", "AI Agent", 6, "AI-powered deal health scoring using engagement and activity signals"),
-        ("REQ-008", "Alex Nguyen", "RevOps", "Quarterly business reviews take 2 weeks to prepare because we're pulling data from 5 different systems and manually building slides.", "Reporting", 16.0, "Low", "Renewal & Expansion", "Medium", "Workflow Automation", 5, "Automated QBR data aggregation and narrative generation"),
+        ("REQ-001", "Sarah Chen", "AE", "Cloud consumption-based churn early warning system using real-time engagement signals.", "Expansion & Renewal", "CRITICAL", "IN BUILD", "2026-02-15 09:00:00"),
+        ("REQ-002", "James Rodriguez", "Customer Success", "Automated QBR data aggregation from data streaming sources for enterprise customers.", "Onboarding & Adoption", "HIGH", "INTAKE", "2026-02-16 10:30:00"),
+        ("REQ-003", "Priya Patel", "RevOps", "Real-time deal health scoring using activity signals and data motion patterns.", "Deal Execution", "MEDIUM", "INTAKE", "2026-02-16 11:45:00"),
+        ("REQ-004", "Mike Ross", "SDR", "AI-powered personalized outreach agent for high-intent 'Cloud Pulse' signals.", "Pipeline Generation", "HIGH", "DEPLOYED", "2026-02-14 14:20:00"),
+        ("REQ-005", "Elena Gomez", "Sales (Manager)", "Automated forecast risk detection based on deal velocity and data stream signals.", "Deal Execution", "CRITICAL", "SCOPING", "2026-02-17 08:30:00"),
+        ("REQ-006", "David Kim", "Customer Success", "Automatic success plan generation based on platform usage bottlenecks.", "Onboarding & Adoption", "MEDIUM", "QA", "2026-02-17 10:15:00"),
+        ("REQ-007", "Rachel Foster", "Sales (Manager)", "Territory 'Data in Motion' map for identifying real-time expansion pockets.", "Expansion & Renewal", "MEDIUM", "INTAKE", "2026-02-17 14:00:00"),
+        ("REQ-008", "Alex Nguyen", "RevOps", "Automated CRM data hygiene scanning for cloud-native record attributes.", "Pipeline Generation", "LOW", "INTAKE", "2026-02-17 15:30:00")
     ]
 
     con.executemany("""
-        INSERT INTO intake_requests (id, requester_name, requester_team, pain_point, workflow_stage, manual_time_hours, urgency, gtm_stage, complexity, approach, priority_score, triage_summary)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO intake_requests (id, requester_name, requester_team, pain_point, gtm_stage, urgency, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, requests_data)
 
     # ── Backlog Items ──
+    # Confluent-specific GTM stages
+    STAGES = ["Pipeline Generation", "Deal Execution", "Onboarding & Adoption", "Expansion & Renewal"]
+    TEAMS = ["Sales (SDR)", "Sales (AE)", "Customer Success", "RevOps", "Marketing Ops", "Sales (Manager)"]
+    URGENCIES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+    STATUSES = ["INTAKE", "SCOPING", "IN BUILD", "QA", "DEPLOYED", "MEASURING"]
+
     backlog_data = [
-        ("BLG-001", "REQ-001", "AI Lead Research Assistant", "Sarah Chen", "Sales (SDR)", "Pipeline Generation", "Medium", "AI Agent", 8, "In Build", "Alex (AI Eng)", "12.5 hrs/week"),
-        ("BLG-002", "REQ-002", "Churn Early Warning System", "James Rodriguez", "Customer Success", "Renewal & Expansion", "Strategic", "AI Agent", 9, "Scoping", "Maya (Data Sci)", "8 hrs/week"),
-        ("BLG-003", "REQ-003", "CRM Data Hygiene Bot", "Priya Patel", "RevOps", "Deal Execution", "Quick Win", "Data Fix", 6, "Deployed", "Alex (AI Eng)", "6 hrs/week"),
-        ("BLG-004", "REQ-004", "AI Follow-Up Drafter", "Marcus Thompson", "Sales (AE)", "Deal Execution", "Quick Win", "AI Agent", 7, "QA", "Alex (AI Eng)", "4 hrs/week"),
-        ("BLG-005", "REQ-005", "Multi-Touch Attribution Engine", "Lisa Wang", "Marketing Ops", "Pipeline Generation", "Strategic", "Workflow Automation", 8, "Scoping", "Jordan (Ops)", "10 hrs/week"),
-        ("BLG-006", "REQ-006", "Automated Onboarding Orchestrator", "David Kim", "Customer Success", "Onboarding & Adoption", "Medium", "Workflow Automation", 7, "In Build", "Jordan (Ops)", "15 hrs/week"),
-        ("BLG-007", "REQ-007", "Deal Health AI Scorer", "Rachel Foster", "Sales (Manager)", "Deal Execution", "Medium", "AI Agent", 6, "Intake", None, "5 hrs/week"),
-        ("BLG-008", "REQ-008", "QBR Auto-Generator", "Alex Nguyen", "RevOps", "Renewal & Expansion", "Medium", "Workflow Automation", 5, "Intake", None, "12 hrs/week"),
+        ("BLG-001", "REQ-001", "Cloud Churn Early Warning", "Sarah Chen", "AE", "Expansion & Renewal", "Strategic", "AI Agent", 9, "In Build", "Maya (Data Sci)", "10 hrs/week"),
+        ("BLG-002", "REQ-002", "Automated QBR Generator", "James Rodriguez", "Customer Success", "Onboarding & Adoption", "Medium", "Workflow Automation", 8, "Intake", None, "12 hrs/week"),
+        ("BLG-003", "REQ-003", "Real-time Deal Health Scorer", "Priya Patel", "RevOps", "Deal Execution", "Medium", "AI Agent", 7, "Intake", None, "8 hrs/week"),
+        ("BLG-004", "REQ-004", "Cloud Pulse Outreach Agent", "Mike Ross", "SDR", "Pipeline Generation", "Quick Win", "AI Agent", 8, "Deployed", "Alex (AI Eng)", "15 hrs/week"),
+        ("BLG-005", "REQ-005", "Forecast Risk Detector", "Elena Gomez", "Sales (Manager)", "Deal Execution", "Strategic", "AI Agent", 9, "Scoping", "Maya (Data Sci)", "10 hrs/week"),
+        ("BLG-006", "REQ-006", "Auto Success Plan Generator", "David Kim", "Customer Success", "Onboarding & Adoption", "Medium", "AI Agent", 7, "QA", "Alex (AI Eng)", "7 hrs/week"),
+        ("BLG-007", "REQ-007", "Territory Data in Motion Map", "Rachel Foster", "Sales (Manager)", "Expansion & Renewal", "Medium", "Workflow Automation", 6, "Intake", None, "6 hrs/week"),
+        ("BLG-008", "REQ-008", "CRM Cloud Data Hygiene", "Alex Nguyen", "RevOps", "Pipeline Generation", "Quick Win", "Data Fix", 5, "Intake", None, "5 hrs/week"),
     ]
 
     con.executemany("""
@@ -150,17 +156,17 @@ def seed_data(con: duckdb.DuckDBPyConnection):
     """, backlog_data)
 
     # ── Impact Metrics (for deployed items) ──
-    impact_data = [
-        ("IMP-001", "REQ-003", "CRM Data Hygiene Bot", "Deployed", 8.0, 1.5, 92.0, 4200.0, 6),
-        ("IMP-002", "REQ-001", "AI Lead Research Assistant", "Measuring", 15.0, 3.0, 78.0, 8500.0, 3),
-        ("IMP-003", "REQ-004", "AI Follow-Up Drafter", "QA", 5.0, 1.0, 0.0, 0.0, 0),
-        ("IMP-004", "REQ-006", "Automated Onboarding Orchestrator", "In Build", 20.0, 5.0, 0.0, 0.0, 0),
+    # Historical ROI Data for Impact Tracker
+    roi_data = [
+        ("IMP-001", "REQ-004", "Cloud Pulse Outreach Agent", "DEPLOYED", 20.0, 4.0, 0.88, 11000.0, 2),
+        ("IMP-002", "REQ-001", "Cloud Churn Early Warning", "MEASURING", 15.0, 3.0, 0.78, 8500.0, 3),
+        ("IMP-003", "REQ-006", "Auto Success Plan Generator", "QA", 22.0, 5.0, 0.0, 0.0, 0),
     ]
 
     con.executemany("""
         INSERT INTO impact_metrics (id, request_id, title, status, manual_time_before, ai_time_after, adoption_rate, roi_estimate, weeks_deployed)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, impact_data)
+    """, roi_data)
 
     # ── Prompt Versions ──
     prompt_data = [

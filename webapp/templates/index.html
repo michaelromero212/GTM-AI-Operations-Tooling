@@ -33,7 +33,7 @@
     </div>
 </div>
 
-<!-- Two-Column Layout -->
+<!-- Main Dashboard Grid -->
 <div class="grid-2">
     <!-- Pipeline Status -->
     <div class="card">
@@ -55,12 +55,12 @@
                     {% for row in status_counts %}
                     <tr>
                         <td>
-                            {% if row.status == 'Intake' %}<span class="badge badge-blue">{{ row.status }}</span>
-                            {% elif row.status == 'Scoping' %}<span class="badge badge-purple">{{ row.status }}</span>
-                            {% elif row.status == 'In Build' %}<span class="badge badge-orange">{{ row.status }}</span>
+                            {% if row.status == 'INTAKE' %}<span class="badge badge-blue">{{ row.status }}</span>
+                            {% elif row.status == 'SCOPING' %}<span class="badge badge-purple">{{ row.status }}</span>
+                            {% elif row.status == 'IN BUILD' %}<span class="badge badge-orange">{{ row.status }}</span>
                             {% elif row.status == 'QA' %}<span class="badge badge-yellow">{{ row.status }}</span>
-                            {% elif row.status == 'Deployed' %}<span class="badge badge-green">{{ row.status }}</span>
-                            {% elif row.status == 'Measuring' %}<span class="badge badge-cyan">{{ row.status }}</span>
+                            {% elif row.status == 'DEPLOYED' %}<span class="badge badge-green">{{ row.status }}</span>
+                            {% elif row.status == 'MEASURING' %}<span class="badge badge-cyan">{{ row.status }}</span>
                             {% else %}<span class="badge">{{ row.status }}</span>{% endif %}
                         </td>
                         <td>{{ row.count }}</td>
@@ -84,91 +84,74 @@
         {% endif %}
     </div>
 
-    <!-- Team Requests -->
+    <!-- Live Event Stream (Data in Motion) -->
     <div class="card">
         <div class="card-header">
-            <span class="card-title">Requests by Team</span>
-            <span class="card-icon">👥</span>
+            <span class="card-title">Live Event Stream (Data in Motion)</span>
+            <span class="card-icon">📡</span>
         </div>
-        {% if team_counts %}
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th>Requests</th>
-                        <th>Share</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in team_counts %}
-                    <tr>
-                        <td><strong>{{ row.requester_team }}</strong></td>
-                        <td>{{ row.count }}</td>
-                        <td>
-                            <div
-                                style="background: var(--bg-secondary); border-radius: 4px; height: 8px; width: 100%; max-width: 200px;">
-                                <div
-                                    style="background: var(--accent-gradient); border-radius: 4px; height: 100%; width: {{ (row.count / total_requests * 100) | int }}%;">
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        {% if audit_entries %}
+        <div class="activity-stream">
+            {% for entry in audit_entries %}
+            <div class="activity-item" data-type="{{ entry.event_type }}">
+                <div class="activity-dot"></div>
+                <div class="activity-content">
+                    <div class="activity-header">
+                        <span class="activity-type">{{ entry.event_type }}</span>
+                        <span class="activity-time">{{ entry.timestamp.split(' ')[1][:5] }}</span>
+                    </div>
+                    <div class="activity-details">{{ entry.details }}</div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
         {% else %}
-        <div class="empty-state"><span class="icon">👥</span>
-            <h3>No teams yet</h3>
+        <div class="empty-state"><span class="icon">📭</span>
+            <h3>No events detected</h3>
         </div>
         {% endif %}
     </div>
 </div>
 
-<!-- Recent Activity -->
+<!-- Requests by Team -->
 <div class="card" style="margin-top: 24px;">
     <div class="card-header">
-        <span class="card-title">Recent Requests</span>
-        <a href="/intake" class="btn btn-sm btn-secondary">+ New Request</a>
+        <span class="card-title">GTM Pipeline Volume by Team</span>
+        <span class="card-icon">👥</span>
     </div>
-    {% if recent %}
+    {% if team_counts %}
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Requester</th>
                     <th>Team</th>
-                    <th>Summary</th>
-                    <th>Urgency</th>
-                    <th>Status</th>
+                    <th>Requests</th>
+                    <th>Share of Automation Suite</th>
                 </tr>
             </thead>
             <tbody>
-                {% for row in recent %}
+                {% for row in team_counts %}
                 <tr>
-                    <td><a href="/builder/{{ row.id }}" class="card-link">{{ row.id }}</a></td>
-                    <td>{{ row.requester_name }}</td>
-                    <td>{{ row.requester_team }}</td>
-                    <td>{{ row.triage_summary or '—' }}</td>
+                    <td><strong>{{ row.requester_team }}</strong></td>
+                    <td>{{ row.count }}</td>
                     <td>
-                        {% if row.urgency == 'Critical' %}<span class="badge badge-red">{{ row.urgency }}</span>
-                        {% elif row.urgency == 'High' %}<span class="badge badge-orange">{{ row.urgency }}</span>
-                        {% elif row.urgency == 'Medium' %}<span class="badge badge-yellow">{{ row.urgency }}</span>
-                        {% else %}<span class="badge badge-blue">{{ row.urgency }}</span>{% endif %}
+                        <div
+                            style="background: var(--bg-secondary); border-radius: 4px; height: 8px; width: 100%; max-width: 200px;">
+                            <div
+                                style="background: var(--accent-gradient); border-radius: 4px; height: 100%; width: {{ (row.count / total_requests * 100) | int }}%;">
+                            </div>
+                        </div>
                     </td>
-                    <td><span class="badge badge-blue">{{ row.status or 'Intake' }}</span></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     {% else %}
-    <div class="empty-state"><span class="icon">📭</span>
-        <h3>No requests yet</h3>
-        <p>Submit your first automation request via the Intake page.</p>
+    <div class="empty-state"><span class="icon">👥</span>
+        <h3>No teams yet</h3>
     </div>
     {% endif %}
 </div>
+
 {% endblock %}

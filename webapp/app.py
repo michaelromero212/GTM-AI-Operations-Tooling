@@ -73,10 +73,16 @@ async def overview(request: Request):
             FROM intake_requests GROUP BY requester_team ORDER BY count DESC
         """).fetchdf().to_dict("records")
 
-        # Recent activity
+        # Recent activity (Triage requests)
         recent = con.execute("""
             SELECT id, requester_name, requester_team, triage_summary, urgency, status, created_at
             FROM intake_requests ORDER BY created_at DESC LIMIT 5
+        """).fetchdf().to_dict("records")
+
+        # Live Event Stream (Audit log)
+        audit_entries = con.execute("""
+            SELECT event_type, details, timestamp
+            FROM audit_log ORDER BY timestamp DESC LIMIT 5
         """).fetchdf().to_dict("records")
 
         con.close()
@@ -90,6 +96,7 @@ async def overview(request: Request):
             "status_counts": status_counts,
             "team_counts": team_counts,
             "recent": recent,
+            "audit_entries": audit_entries,
             "error": None,
         })
     except Exception as e:
@@ -102,10 +109,28 @@ async def overview(request: Request):
 
 @app.get("/intake", response_class=HTMLResponse)
 async def intake_page(request: Request):
-    """Intake form — submit a new automation request."""
-    return templates.TemplateResponse("intake.html", {
-        "request": request, "result": None, "error": None,
-    })
+    """Intake Triage Queue — view and manage automated ingestions."""
+    try:
+        con = get_db()
+        # Fetch requests that are still in 'Intake' or 'Scoping' for triage
+        queue = con.execute("""
+            SELECT id, requester_name, requester_team, triage_summary, urgency, status, created_at
+            FROM intake_requests 
+            ORDER BY created_at DESC 
+            LIMIT 10
+        """).fetchdf().to_dict("records")
+        con.close()
+        
+        return templates.TemplateResponse("intake.html", {
+            "request": request, 
+            "queue": queue,
+            "result": None, 
+            "error": None,
+        })
+    except Exception as e:
+        return templates.TemplateResponse("intake.html", {
+            "request": request, "queue": [], "result": None, "error": str(e),
+        })
 
 
 @app.post("/intake", response_class=HTMLResponse)

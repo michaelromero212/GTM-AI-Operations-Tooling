@@ -17,13 +17,13 @@ The **GTM AI Operations Hub** provides a professional framework to:
 
 ## ✨ Key Features
 
-### 📊 Operations Overview
-A real-time snapshot of the automation pipeline. Track requests by team, status (Scoping → Deployed), and total hours saved across the organization.
+### 📊 Operations Overview & Data in Motion
+A real-time snapshot of the automation pipeline. Featuring a **Live Event Stream** that captures every AI decision, security check, and workflow update as "Data in Motion" — echoing Confluent's core philosophy.
 
-### 📥 AI-Powered Intake & Triage
-Submit manual pain points in plain natural language. The system uses LLMs to:
-- **Classify**: Map requests to GTM stages (Pipeline Gen, Deal Exec, etc.).
-- **Triage**: Assign complexity scores and priority based on business impact.
+### 📥 AI-Powered Triage Queue
+No more manual forms. This hub acts as the control center for requests ingested from **📧 Email, 💬 Slack, and ☁️ Salesforce**. The system uses LLMs to:
+- **Classify**: Map requests to Confluent GTM stages (Pipeline Gen, Deal Exec, Onboarding & Adoption, Expansion & Renewal).
+- **Triage**: Assign complexity scores and priority based on business impact and labor costs.
 - **Blueprint**: Generate structured requirements briefs and workflow architecture.
 
 ![Intake & Triage](screenshots/intake.jpg)

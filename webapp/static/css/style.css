@@ -294,6 +294,107 @@ body {
     }
 }
 
+/* ── Activity Stream ── */
+.activity-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.activity-item {
+    display: flex;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.activity-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.activity-dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0.4;
+    animation: activity-pulse 2s infinite;
+}
+
+@keyframes activity-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+.activity-item[data-type*="Update"] .activity-dot {
+    background: var(--accent-blue);
+}
+
+.activity-item[data-type*="Security"] .activity-dot {
+    background: var(--accent-red);
+}
+
+.activity-item[data-type*="Event"] .activity-dot {
+    background: var(--accent-green);
+}
+
+.activity-item[data-type*="Governance"] .activity-dot {
+    background: var(--accent-yellow);
+}
+
+.activity-item[data-type*="Live"] .activity-dot {
+    background: var(--accent-purple);
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.activity-type {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+
+.activity-time {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.activity-details {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
 /* ── Page Container ── */
 .page {
     padding: 32px;
