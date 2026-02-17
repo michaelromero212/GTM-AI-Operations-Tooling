@@ -81,7 +81,7 @@ async def overview(request: Request):
 
         # Live Event Stream (Audit log)
         audit_entries = con.execute("""
-            SELECT event_type, details, timestamp
+            SELECT event_type, description, CAST(timestamp AS VARCHAR) as timestamp
             FROM audit_log ORDER BY timestamp DESC LIMIT 5
         """).fetchdf().to_dict("records")
 
