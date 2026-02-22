@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from agent.agent import GTMOpsAgent
+from agent.relevance_handler import RelevanceAgentHandler
 from data.seed import initialize_database, DB_PATH
 
 # ─────────── App Setup ───────────
@@ -23,8 +24,9 @@ app = FastAPI(title="GTM AI Operations Hub")
 app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
-# Initialize agent and database
+# Initialize agents and database
 agent = GTMOpsAgent()
+relevance_agent = RelevanceAgentHandler()
 _db_initialized = False
 
 
@@ -42,9 +44,13 @@ def get_db() -> duckdb.DuckDBPyConnection:
 
 @app.get("/api/ai-status")
 async def ai_status():
-    """Check AI/LLM connection health by pinging HuggingFace."""
-    result = agent.check_health()
-    return JSONResponse(result)
+    """Check AI/LLM connection health by pinging HuggingFace and Relevance AI."""
+    llm_status = agent.check_health()
+    relevance_status = relevance_agent.check_health()
+    return JSONResponse({
+        "llm": llm_status,
+        "relevance": relevance_status
+    })
 
 
 # ─────────── Page Routes ───────────
@@ -367,6 +373,28 @@ async def builder_generate(request: Request, request_id: str):
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 
+@app.post("/builder/{request_id}/enrich")
+async def builder_enrich(request_id: str):
+    """Trigger Relevance AI deep enrichment research."""
+    try:
+        con = get_db()
+        req = con.execute("SELECT * FROM intake_requests WHERE id = ?", [request_id]).fetchdf()
+        if len(req) == 0:
+            con.close()
+            return JSONResponse({"success": False, "error": "Request not found"}, status_code=404)
+
+        item = req.to_dict("records")[0]
+        con.close()
+
+        result = relevance_agent.trigger_research(
+            company_name=item.get("requester_team", "Potential Client"),
+            context=item.get("pain_point", "")
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+
 @app.post("/builder/{request_id}/prompt-lab")
 async def prompt_lab_submit(
     request: Request,
@@ -506,3 +534,81 @@ async def impact_page(request: Request):
             "total_time_saved": 0, "total_roi": 0, "avg_adoption": 0, "deployed_count": 0,
         })
 
+
+@app.get("/agent-lab", response_class=HTMLResponse)
+async def agent_lab_page(request: Request):
+    """Agent Lab — interact with specialized Relevance AI agents."""
+    agents = [
+        {
+            "id": "lead-icp-evaluator",
+            "name": "Lead ICP Evaluator",
+            "description": "Deterministic ICP scoring for inbound leads.",
+            "icon": "🎯",
+            "embed_url": ""  # Placeholder: Add Relevance AI iframe URL here
+        },
+        {
+            "id": "gtm-workflow-analyzer",
+            "name": "GTM Workflow Automation Analyzer",
+            "description": "Analyzes Go-To-Market workflow descriptions to identify friction points and suggest automation.",
+            "icon": "⚙️",
+            "embed_url": ""
+        },
+        {
+            "id": "customer-expansion-evaluator",
+            "name": "Customer Expansion Evaluator",
+            "description": "Analyzes customer accounts to identify expansion opportunities by evaluating usage patterns.",
+            "icon": "📈",
+            "embed_url": ""
+        },
+        {
+            "id": "sales-intelligence-extractor",
+            "name": "Sales Intelligence Extractor",
+            "description": "Analyzes call transcripts to extract structured sales intelligence including champion identification.",
+            "icon": "🧠",
+            "embed_url": ""
+        },
+        {
+            "id": "sales-opportunity-risk-analyzer",
+            "name": "Sales Opportunity Risk Analyzer",
+            "description": "Analyzes open sales opportunities to calculate risk scores, identify risk drivers, and recommend actions.",
+            "icon": "⚠️",
+            "embed_url": ""
+        },
+        {
+            "id": "gtm-research-assistant",
+            "name": "GTM Research Assistant",
+            "description": "Expert Go-To-Market research agent that analyzes companies and leads to uncover technographic data.",
+            "icon": "🔍",
+            "embed_url": ""  # Placeholder
+        }
+    ]
+    
+    # Check if user has selected a specific agent from query params
+    selected_id = request.query_params.get("agent", "lead-icp-evaluator")
+    
+    # Validate selected agent
+    selected_agent = next((a for a in agents if a["id"] == selected_id), agents[0])
+
+    return templates.TemplateResponse("agent_lab.html", {
+        "request": request,
+        "agents": agents,
+        "selected_agent": selected_agent,
+        "error": None
+    })
+
+from pydantic import BaseModel
+
+class ChatMessage(BaseModel):
+    message: str
+
+@app.post("/api/agent-lab/{agent_id}/chat")
+async def agent_lab_chat(agent_id: str, payload: ChatMessage):
+    """Send a message to a Relevance AI agent."""
+    try:
+        result = relevance_agent.chat_with_agent(
+            agent_id=agent_id,
+            message=payload.message
+        )
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)

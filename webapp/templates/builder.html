@@ -88,10 +88,16 @@
 <div class="card" style="margin-bottom: 24px;">
     <div class="card-header">
         <span class="card-title">🚀 Workflow Blueprint</span>
-        <button class="btn btn-primary" id="generate-blueprint-btn" onclick="generateBlueprint('{{ item.id }}')">
-            🧠 Generate Blueprint
-        </button>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" id="enrich-btn" onclick="enrichWorkflow('{{ item.id }}')">
+                🔍 Deep Enrich (Relevance AI)
+            </button>
+            <button class="btn btn-primary" id="generate-blueprint-btn" onclick="generateBlueprint('{{ item.id }}')">
+                🧠 Generate Blueprint
+            </button>
+        </div>
     </div>
+    <div id="enrich-status" style="margin-bottom: 12px;"></div>
     <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
         Click "Generate Blueprint" to have the AI create a current→future state workflow design with integrations and
         governance.

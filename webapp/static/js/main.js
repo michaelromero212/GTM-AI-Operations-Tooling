@@ -25,47 +25,42 @@ class AIStatusMonitor {
         if (!this.badge) return;
 
         this.badge.setAttribute('data-status', 'checking');
-        this.label.textContent = 'Checking…';
-        this.latency.textContent = '';
+        this.label.textContent = 'Checking AI Stack…';
 
         try {
             const resp = await fetch('/api/ai-status');
             const data = await resp.json();
 
-            this.badge.setAttribute('data-status', data.status);
-            this.consecutiveErrors = 0;
+            // Update LLM Badge (legacy or main)
+            const llm = data.llm;
+            this.badge.setAttribute('data-status', llm.status);
+            this.label.textContent = llm.status === 'connected' ? 'AI Workforce Online' : (llm.status === 'no_token' ? 'Mock Mode' : 'AI Offline');
 
-            switch (data.status) {
-                case 'connected':
-                    this.label.textContent = 'AI Connected';
-                    this.latency.textContent = data.latency_ms ? `${data.latency_ms}ms` : '';
-                    // Slow poll when connected
-                    this.setInterval(30000);
-                    break;
-                case 'disconnected':
-                    this.label.textContent = 'AI Disconnected';
-                    this.latency.textContent = data.latency_ms ? `${data.latency_ms}ms` : '';
-                    // Faster retry
-                    this.setInterval(15000);
-                    break;
-                case 'no_token':
-                    this.label.textContent = 'Mock Mode';
-                    this.latency.textContent = '';
-                    this.setInterval(60000);
-                    break;
-                default:
-                    this.label.textContent = 'Unknown';
-            }
+            // Update individual workforce cards if they exist
+            this.updateWorkforceCard('llm', llm);
+            this.updateWorkforceCard('relevance', data.relevance);
+
+            this.consecutiveErrors = 0;
+            this.setInterval(llm.status === 'connected' ? 30000 : 15000);
         } catch (err) {
             this.consecutiveErrors++;
             this.badge.setAttribute('data-status', 'disconnected');
-            this.label.textContent = 'Server Error';
-            this.latency.textContent = '';
-
-            if (this.consecutiveErrors > 3) {
-                this.setInterval(60000);
-            }
+            this.label.textContent = 'Connection Error';
+            if (this.consecutiveErrors > 3) this.setInterval(60000);
         }
+    }
+
+    updateWorkforceCard(type, data) {
+        const card = document.querySelector(`.agent-card[data-agent="${type}"]`);
+        if (!card) return;
+
+        const statusDot = card.querySelector('.status-dot');
+        const statusText = card.querySelector('.agent-status-text');
+        const latencyText = card.querySelector('.agent-latency');
+
+        card.setAttribute('data-state', data.status);
+        if (statusText) statusText.textContent = data.message || data.status;
+        if (latencyText) latencyText.textContent = data.latency_ms ? `${data.latency_ms}ms` : '';
     }
 
     setInterval(ms) {
@@ -204,6 +199,37 @@ async function generateBlueprint(requestId) {
     } finally {
         btn.disabled = false;
         btn.innerHTML = '🧠 Generate Blueprint';
+    }
+}
+
+async function enrichWorkflow(requestId) {
+    const btn = document.getElementById('enrich-btn');
+    const status = document.getElementById('enrich-status');
+
+    if (!btn || !status) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Triggering Relevance AI…';
+    status.innerHTML = '';
+
+    try {
+        const resp = await fetch(`/builder/${requestId}/enrich`, { method: 'POST' });
+        const data = await resp.json();
+
+        if (data.status === 'success') {
+            status.innerHTML = `
+                <div class="alert alert-success fade-in">
+                    <strong>✨ Research Triggered!</strong><br>
+                    Relevance AI is now performing deep enrichment. Conversation: <code>${data.conversation_id}</code>
+                </div>`;
+        } else {
+            status.innerHTML = `<div class="alert alert-error">Error: ${data.message}</div>`;
+        }
+    } catch (err) {
+        status.innerHTML = `<div class="alert alert-error">Network Error: ${err.message}</div>`;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🔍 Deep Enrich (Relevance AI)';
     }
 }
 
